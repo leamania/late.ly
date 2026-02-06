@@ -4,14 +4,17 @@ import google.generativeai as genai
 # Sayfa Ayarları
 st.set_page_config(page_title="Geç Kaldım!", page_icon="🏃")
 
-# Başlık ve Açıklama
+# Başlık
 st.title("🏃 Geç Kaldım Generator")
 st.write("Patrona yakalanmadan önce buradan bir yalan seç!")
 
-# API Key Ayarı (Bunu sonra gizleyeceğiz)
-# Buraya kendi API Key'ini yapıştırma, aşağıda anlatacağım "Secrets" kısmından çekeceğiz.
-api_key = st.secrets["GEMINI_API_KEY"]
-genai.configure(api_key=api_key)
+# API Key Kontrolü
+if "GEMINI_API_KEY" in st.secrets:
+    api_key = st.secrets["GEMINI_API_KEY"]
+    genai.configure(api_key=api_key)
+else:
+    st.error("API Key bulunamadı! Lütfen Secrets ayarlarını kontrol et.")
+    st.stop()
 
 # Kullanıcı Girdileri
 col1, col2 = st.columns(2)
@@ -24,18 +27,22 @@ with col2:
 
 # Buton
 if st.button("Bahaneyi Üret"):
-    model = genai.GenerativeModel('gemini-1.5-flash') # Modeli seçtik
-    
-    # Senin Prompt Yapın
-    prompt = f"""
-    Sen 'Geç Kaldım' uygulamasısın.
-    Girdi: {sure} gecikme, {tema} konulu, {patron} tipinde patrona uygun Türkçe bahane.
-    Görev: Türkiye şartlarına uygun (trafik, metrobüs vb.) 2 seçenek üret.
-    Seçenek A (Garanti):
-    Seçenek B (Yaratıcı):
-    Sadece bu iki seçeneği çıktı olarak ver.
-    """
-    
-    with st.spinner('Yalanlar pişiriliyor...'):
-        response = model.generate_content(prompt)
-        st.write(response.text)
+    try:
+        # Model Seçimi - En kararlı versiyon
+        model = genai.GenerativeModel('gemini-1.5-flash') 
+        
+        prompt = f"""
+        Sen 'Geç Kaldım' uygulamasısın.
+        Girdi: {sure} gecikme, {tema} konulu, {patron} tipinde patrona uygun Türkçe bahane.
+        Görev: Türkiye şartlarına uygun (trafik, metrobüs vb.) 2 seçenek üret.
+        Seçenek A (Garanti):
+        Seçenek B (Yaratıcı):
+        Sadece bu iki seçeneği çıktı olarak ver.
+        """
+        
+        with st.spinner('Yalanlar pişiriliyor...'):
+            response = model.generate_content(prompt)
+            st.write(response.text)
+            
+    except Exception as e:
+        st.error(f"Bir hata oluştu: {e}")
