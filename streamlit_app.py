@@ -24,7 +24,7 @@ with col2:
 
 # Buton
 if st.button("Bahaneyi Üret"):
-    model = genai.GenerativeModel('gemini-2.0-flash') # Modeli seçtik
+    model = genai.GenerativeModel('gemini-1.5-flash') # Modeli seçtik
     
     # Senin Prompt Yapın
     prompt = f"""
